@@ -106,3 +106,5 @@ dotnet ef database update
 ---
 
 
+admin@community.local
+Admin123!

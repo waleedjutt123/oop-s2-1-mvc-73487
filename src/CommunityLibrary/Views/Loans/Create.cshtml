@@ -1,0 +1,32 @@
+@model CommunityLibrary.Models.LoanCreateViewModel
+@{
+    ViewData["Title"] = "Create Loan";
+}
+
+<h1>Create Loan</h1>
+
+<form asp-action="Create" method="post" class="mt-3">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="mb-3">
+        <label asp-for="MemberId" class="form-label"></label>
+        <select asp-for="MemberId" class="form-select"
+                asp-items="@(new SelectList(Model.Members, nameof(CommunityLibrary.Models.Member.Id), nameof(CommunityLibrary.Models.Member.FullName)))">
+            <option value="">Select a member</option>
+        </select>
+        <span asp-validation-for="MemberId" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="BookId" class="form-label"></label>
+        <select asp-for="BookId" class="form-select"
+                asp-items="@(new SelectList(Model.AvailableBooks, nameof(CommunityLibrary.Models.Book.Id), nameof(CommunityLibrary.Models.Book.Title)))">
+            <option value="">Select an available book</option>
+        </select>
+        <span asp-validation-for="BookId" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create</button>
+    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+</form>
+
