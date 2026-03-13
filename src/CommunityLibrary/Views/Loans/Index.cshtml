@@ -5,6 +5,16 @@
 
 <h1>Loans</h1>
 
+@{
+    var overdueCount = ViewData["OverdueCount"] as int? ?? 0;
+}
+@if (overdueCount > 0)
+{
+    <div class="alert alert-warning mb-3">
+        <strong>Overdue:</strong> @overdueCount loan(s) have DueDate passed and are not yet returned (ReturnedDate is null).
+    </div>
+}
+
 <div class="mb-3">
     <a asp-action="Create" class="btn btn-success">Create New Loan</a>
 </div>

@@ -1,10 +1,12 @@
 using CommunityLibrary.Data;
 using CommunityLibrary.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace CommunityLibrary.Controllers;
 
+[Authorize(Roles = "Staff,Admin")]
 public class LoansController : Controller
 {
     private readonly ApplicationDbContext _context;
@@ -14,14 +16,17 @@ public class LoansController : Controller
         _context = context;
     }
 
-   
     public async Task<IActionResult> Index()
     {
+        var today = DateTime.Today;
         var loans = await _context.Loans
             .Include(l => l.Book)
             .Include(l => l.Member)
             .OrderByDescending(l => l.LoanDate)
             .ToListAsync();
+
+        var overdueCount = loans.Count(l => l.ReturnedDate == null && l.DueDate < today);
+        ViewData["OverdueCount"] = overdueCount;
 
         return View(loans);
     }

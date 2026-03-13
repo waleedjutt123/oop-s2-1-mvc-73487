@@ -18,44 +18,54 @@ public static class SeedData
 
         await context.Database.MigrateAsync();
 
-        await EnsureAdminAsync(userManager, roleManager);
+        await EnsureRolesAndUsersAsync(userManager, roleManager);
         await SeedDomainDataAsync(context);
     }
 
-    private static async Task EnsureAdminAsync(
+    private static async Task EnsureRolesAndUsersAsync(
         UserManager<IdentityUser> userManager,
         RoleManager<IdentityRole> roleManager)
     {
         const string adminRoleName = "Admin";
-        const string adminEmail = "admin@community.local";
-        const string adminPassword = "Admin123!";
+        const string staffRoleName = "Staff";
 
         if (!await roleManager.RoleExistsAsync(adminRoleName))
-        {
             await roleManager.CreateAsync(new IdentityRole(adminRoleName));
-        }
+        if (!await roleManager.RoleExistsAsync(staffRoleName))
+            await roleManager.CreateAsync(new IdentityRole(staffRoleName));
+
+        const string adminEmail = "admin@community.local";
+        const string adminPassword = "Admin123!";
+        const string staffEmail = "staff@community.local";
+        const string staffPassword = "Staff123!";
 
         var adminUser = await userManager.FindByEmailAsync(adminEmail);
         if (adminUser is null)
         {
-            adminUser = new IdentityUser
-            {
-                UserName = adminEmail,
-                Email = adminEmail,
-                EmailConfirmed = true
-            };
-
-            var result = await userManager.CreateAsync(adminUser, adminPassword);
-            if (!result.Succeeded)
-            {
-                return;
-            }
+            adminUser = new IdentityUser { UserName = adminEmail, Email = adminEmail, EmailConfirmed = true };
+            await userManager.CreateAsync(adminUser, adminPassword);
         }
-
-        if (!await userManager.IsInRoleAsync(adminUser, adminRoleName))
+        else
         {
-            await userManager.AddToRoleAsync(adminUser, adminRoleName);
+            var token = await userManager.GeneratePasswordResetTokenAsync(adminUser);
+            await userManager.ResetPasswordAsync(adminUser, token, adminPassword);
         }
+        if (!await userManager.IsInRoleAsync(adminUser, adminRoleName))
+            await userManager.AddToRoleAsync(adminUser, adminRoleName);
+
+        var staffUser = await userManager.FindByEmailAsync(staffEmail);
+        if (staffUser is null)
+        {
+            staffUser = new IdentityUser { UserName = staffEmail, Email = staffEmail, EmailConfirmed = true };
+            await userManager.CreateAsync(staffUser, staffPassword);
+        }
+        else
+        {
+            var token = await userManager.GeneratePasswordResetTokenAsync(staffUser);
+            await userManager.ResetPasswordAsync(staffUser, token, staffPassword);
+        }
+        if (!await userManager.IsInRoleAsync(staffUser, staffRoleName))
+            await userManager.AddToRoleAsync(staffUser, staffRoleName);
     }
 
     private static async Task SeedDomainDataAsync(ApplicationDbContext context)

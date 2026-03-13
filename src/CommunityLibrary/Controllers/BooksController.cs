@@ -1,10 +1,12 @@
 using CommunityLibrary.Data;
 using CommunityLibrary.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace CommunityLibrary.Controllers;
 
+[Authorize(Roles = "Staff,Admin")]
 public class BooksController : Controller
 {
     private readonly ApplicationDbContext _context;
